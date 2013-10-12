@@ -31,7 +31,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 public OnPluginStart()
 {
   LoadTranslations("common.phrases");
-  RegAdminCmd("sm_random_timed",Command_random_timed,ADMFLAG_ROOT,"Toggles timed randomization");
+  RegAdminCmd("sm_random_force_all",Command_random_force_all,ADMFLAG_ROOT,"Force randomization for all clients");
   CreateConVar("sm_random_version", PLUGIN_VERSION, "Random classes on death", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
   hRandom = CreateConVar("sm_random", "1", "Enable/Disable(1/0) Randomize classes on death", FCVAR_PLUGIN|FCVAR_NOTIFY);
   HookEvent("player_spawn", Event_PlayerSpawn);
@@ -50,7 +50,7 @@ public Event_PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
 	}
 }
 
-public Action:Command_random_timed(client, args)
+public Action:Command_random_force_all(client, args)
 {
   for (new i=1; i<=MaxClients; i++)
   {

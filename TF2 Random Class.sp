@@ -15,6 +15,10 @@ public Plugin:myinfo =
 };
 
 new Handle:hRandom = INVALID_HANDLE;
+new Handle:sm_random_timed_enabled;
+new Handle:sm_random_timed_time;
+new Handle:time_handle;
+new Float:timez;
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
@@ -32,6 +36,10 @@ public OnPluginStart()
 {
   LoadTranslations("common.phrases");
   RegAdminCmd("sm_random_force_all",Command_random_force_all,ADMFLAG_ROOT,"Force randomization for all clients");
+  sm_random_timed_enabled = CreateConVar("sm_random_timed_enabled", "0", "Enable timed randomization \n1=Enabled\n0=Disabled", FCVAR_NONE, true, 0.0, true, 1.0);
+  sm_random_timed_time = CreateConVar("sm_random_time", "5", "Time increment to randomize classes");
+  timez = GetConVarFloat(sm_random_timed_time);
+  HookConVarChange(sm_random_timed_time, timeCVarChanged);
   CreateConVar("sm_random_version", PLUGIN_VERSION, "Random classes on death", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
   hRandom = CreateConVar("sm_random", "1", "Enable/Disable(1/0) Randomize classes on death", FCVAR_PLUGIN|FCVAR_NOTIFY);
   HookEvent("player_spawn", Event_PlayerSpawn);
@@ -67,4 +75,40 @@ public Action:Command_random_force_all(client, args)
     SetEntPropEnt(user, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(user, TFWeaponSlot_Primary));
   }
   return Plugin_Handled;
+}
+
+stock ClearTimer(&Handle:timer)
+{
+  if (timer != INVALID_HANDLE)
+  {
+    KillTimer(timer);
+    timer = INVALID_HANDLE;
+  }
+}
+
+public OnMapStart()
+{
+  time_handle = CreateTimer(timez, execute, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public OnMapEnd()
+{
+  KillTimer(time_handle);
+}
+
+public Action:execute(Handle:timer)
+{
+  if(GetConVarInt(sm_random_timed_enabled) == 1)
+  {
+    Command_random_force_all(1,1);
+  }
+}
+
+public timeCVarChanged(Handle:cvar, const String:oldVal[], const String:newVal[])
+{
+  timez = GetConVarFloat(cvar);
+  KillTimer(time_handle);
+  {
+    time_handle = CreateTimer(timez, execute, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+  }
 }

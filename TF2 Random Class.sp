@@ -4,7 +4,7 @@
 #include <tf2>
 #include <tf2_stocks>
 
-#define PLUGIN_VERSION "0.0.2"
+#define PLUGIN_VERSION "0.0.3"
 
 public Plugin:myinfo =
 {
@@ -36,8 +36,8 @@ public OnPluginStart()
 {
   LoadTranslations("common.phrases");
   RegAdminCmd("sm_random_force_all",Command_random_force_all,ADMFLAG_ROOT,"Force randomization for all clients");
-  sm_random_timed_enabled = CreateConVar("sm_random_timed_enabled", "0", "Enable timed randomization \n1=Enabled\n0=Disabled", FCVAR_NONE, true, 0.0, true, 1.0);
-  sm_random_timed_time = CreateConVar("sm_random_time", "15", "Time increment to randomize classes");
+  sm_random_timed_enabled = CreateConVar("sm_random_timed_enabled", "1", "Enable timed randomization \n1=Enabled\n0=Disabled", FCVAR_NONE, true, 0.0, true, 1.0);
+  sm_random_timed_time = CreateConVar("sm_random_time", "10", "Time increment to randomize classes");
   timez = GetConVarFloat(sm_random_timed_time);
   HookConVarChange(sm_random_timed_time, timeCVarChanged);
   CreateConVar("sm_random_version", PLUGIN_VERSION, "Random classes on death", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
@@ -66,9 +66,14 @@ public Action:Command_random_force_all(client, args)
     {
       continue;
     }
+    if (!IsClientInGame(i))
+    {
+      continue;
+    }
     new user = GetClientOfUserId(GetClientUserId(i));
     new TFClassType:class;
     class = TFClassType:GetRandomInt(1,9);
+    TF2_RemoveCondition(user, TFCond:TFCond_Zoomed);
     TF2_SetPlayerClass(user, class);
     SetEntityHealth(user, 25);
     TF2_RegeneratePlayer(user);

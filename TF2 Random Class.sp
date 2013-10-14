@@ -73,10 +73,15 @@ public Action:Command_random_force_all(client, args)
     new user = GetClientOfUserId(GetClientUserId(i));
     new TFClassType:class;
     class = TFClassType:GetRandomInt(1,9);
-    TF2_RemoveCondition(user, TFCond:TFCond_Zoomed);
     TF2_SetPlayerClass(user, class);
     SetEntityHealth(user, 25);
     TF2_RegeneratePlayer(user);
+    if(!(TF2_IsPlayerInCondition(user, TFCond_Slowed) || TF2_IsPlayerInCondition(user, TFCond_Zoomed) ||
+    TF2_IsPlayerInCondition(user, TFCond_Bonked) || TF2_IsPlayerInCondition(user, TFCond_Dazed) ||
+    TF2_IsPlayerInCondition(user, TFCond_Charging) || TF2_IsPlayerInCondition(user, TFCond_SpeedBuffAlly)))
+    {
+      SetEntDataFloat(user, FindSendPropInfo("CTFPlayer", "m_flMaxspeed"), 300.0);
+    }
     SetEntPropEnt(user, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(user, TFWeaponSlot_Primary));
   }
   return Plugin_Handled;

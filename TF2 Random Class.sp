@@ -4,7 +4,7 @@
 #include <tf2>
 #include <tf2_stocks>
 
-#define PLUGIN_VERSION "0.0.3"
+#define PLUGIN_VERSION "0.0.4"
 
 public Plugin:myinfo =
 {
@@ -49,12 +49,7 @@ public Event_PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if (GetConVarBool(hRandom)){
     new user = GetClientOfUserId(GetEventInt(event, "userid"));
-    new TFClassType:class;
-    class = TFClassType:GetRandomInt(1, 9);
-    TF2_SetPlayerClass(user, class);
-    SetEntityHealth(user, 25);
-    TF2_RegeneratePlayer(user);
-    SetEntPropEnt(user, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(user, TFWeaponSlot_Primary));
+    RandomizeClass(user);
 	}
 }
 
@@ -71,20 +66,20 @@ public Action:Command_random_force_all(client, args)
       continue;
     }
     new user = GetClientOfUserId(GetClientUserId(i));
-    new TFClassType:class;
-    class = TFClassType:GetRandomInt(1,9);
-    TF2_SetPlayerClass(user, class);
-    SetEntityHealth(user, 25);
-    TF2_RegeneratePlayer(user);
-    if(!(TF2_IsPlayerInCondition(user, TFCond_Slowed) || TF2_IsPlayerInCondition(user, TFCond_Zoomed) ||
-    TF2_IsPlayerInCondition(user, TFCond_Bonked) || TF2_IsPlayerInCondition(user, TFCond_Dazed) ||
-    TF2_IsPlayerInCondition(user, TFCond_Charging) || TF2_IsPlayerInCondition(user, TFCond_SpeedBuffAlly)))
-    {
-      SetEntDataFloat(user, FindSendPropInfo("CTFPlayer", "m_flMaxspeed"), 300.0);
-    }
-    SetEntPropEnt(user, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(user, TFWeaponSlot_Primary));
+    RandomizeClass(user);
   }
   return Plugin_Handled;
+}
+
+public RandomizeClass(user)
+{
+  new TFClassType:class;
+  class = TFClassType:GetRandomInt(1,9);
+  TF2_SetPlayerClass(user, class);
+  SetEntityHealth(user, 25);
+  TF2_RegeneratePlayer(user);
+  SetEntPropEnt(user, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(user, TFWeaponSlot_Primary));
+
 }
 
 stock ClearTimer(&Handle:timer)
